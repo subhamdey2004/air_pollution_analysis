@@ -1,0 +1,21 @@
+# Features used in the project
+features:
+  pollution:
+    - PM2.5
+    - PM10
+    - NO
+    - NO2
+    - NOx
+    - NH3
+    - CO
+    - SO2
+    - O3
+    - Benzene
+    - Toluene
+    - Xylene
+    - AQI
+
+# Paths to data folders
+paths:
+  raw_data: "data/raw"
+  processed_data: "data/processed"

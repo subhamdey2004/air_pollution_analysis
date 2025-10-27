@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Air Pollution Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.5em;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 2rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .welcome-section h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-section p {
+            color: #666;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .result {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result h4 {
+            margin-bottom: 0.5rem;
+        }
+
+        .result-value {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .quality-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            margin-top: 0.5rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .message.show {
+            display: block;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #f9f9f9;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-item-city {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .history-item-date {
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .history-item-prediction {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .navbar a {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🌍 Air Pollution Analysis</h1>
+        <div>
+            <a href="/history">📊 History</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h2>Welcome, <span id="username"></span>!</h2>
+            <p>Enter air quality parameters to get pollution predictions and analysis.</p>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h3>📈 Pollution Analysis</h3>
+                <div id="message" class="message"></div>
+
+                <div class="form-group">
+                    <label for="city">City Name</label>
+                    <input type="text" id="city" placeholder="e.g., Ahmedabad">
+                </div>
+
+                <div class="form-group">
+                    <label for="PM25">PM2.5 (μg/m³)</label>
+                    <input type="number" id="PM25" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="PM10">PM10 (μg/m³)</label>
+                    <input type="number" id="PM10" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="NO2">NO2 (μg/m³)</label>
+                    <input type="number" id="NO2" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="NOx">NOx (μg/m³)</label>
+                    <input type="number" id="NOx" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="NH3">NH3 (μg/m³)</label>
+                    <input type="number" id="NH3" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="CO">CO (mg/m³)</label>
+                    <input type="number" id="CO" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="SO2">SO2 (μg/m³)</label>
+                    <input type="number" id="SO2" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label for="O3">O3 (μg/m³)</label>
+                    <input type="number" id="O3" step="0.1" min="0" placeholder="0.0">
+                </div>
+
+                <button class="btn" id="predictBtn">Predict AQI</button>
+
+                <div id="result" class="result">
+                    <h4>Prediction Result</h4>
+                    <div class="result-value" id="resultValue">-</div>
+                    <div>Air Quality: <span class="quality-badge" id="qualityBadge">-</span></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📋 Recent Predictions</h3>
+                <div class="history-list" id="historyList">
+                    <p style="color: #999;">No predictions yet</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('username').textContent = localStorage.getItem('username') || 'User';
+
+        async function makePrediction() {
+            const city = document.getElementById('city').value;
+            const PM25 = document.getElementById('PM25').value;
+            const PM10 = document.getElementById('PM10').value;
+            const NO2 = document.getElementById('NO2').value;
+            const NOx = document.getElementById('NOx').value;
+            const NH3 = document.getElementById('NH3').value;
+            const CO = document.getElementById('CO').value;
+            const SO2 = document.getElementById('SO2').value;
+            const O3 = document.getElementById('O3').value;
+
+            if (!city || !PM25 || !PM10 || !NO2 || !NOx || !NH3 || !CO || !SO2 || !O3) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('predictBtn');
+            btn.disabled = true;
+            btn.textContent = 'Predicting...';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ city, PM25, PM10, NO2, NOx, NH3, CO, SO2, O3 })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('resultValue').textContent = result.prediction + ' AQI';
+                    document.getElementById('qualityBadge').textContent = result.quality;
+                    document.getElementById('result').classList.add('show');
+                    showMessage('Prediction completed successfully!', 'success');
+                    loadHistory();
+                } else {
+                    showMessage(result.message, 'error');
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Predict AQI';
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = message;
+            messageEl.className = `message show ${type}`;
+            setTimeout(() => {
+                messageEl.classList.remove('show');
+            }, 4000);
+        }
+
+        async function loadHistory() {
+            try {
+                const response = await fetch('/history');
+                const html = await response.text();
+                // Parse and display recent predictions
+                const predictions = document.querySelectorAll('.prediction-item');
+                if (predictions.length > 0) {
+                    let historyHTML = '';
+                    predictions.forEach((pred, index) => {
+                        if (index < 5) {
+                            const city = pred.getAttribute('data-city');
+                            const date = pred.getAttribute('data-date');
+                            const result = pred.getAttribute('data-result');
+                            historyHTML += `
+                                <div class="history-item">
+                                    <div class="history-item-header">
+                                        <span class="history-item-city">${city}</span>
+                                        <span class="history-item-date">${date}</span>
+                                    </div>
+                                    <div class="history-item-prediction">AQI: ${parseFloat(result).toFixed(2)}</div>
+                                </div>
+                            `;
+                        }
+                    });
+                    if (historyHTML) {
+                        document.getElementById('historyList').innerHTML = historyHTML;
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        document.getElementById('predictBtn').addEventListener('click', makePrediction);
+
+        // Load history on page load
+        window.addEventListener('load', loadHistory);
+    </script>
+</body>
+</html>

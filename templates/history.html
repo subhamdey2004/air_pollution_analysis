@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction History - Air Pollution Analysis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.5em;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 2rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
+        .navbar a:hover {
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h2 {
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        .filters {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        .aqi-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .aqi-good {
+            background: #28a745;
+        }
+
+        .aqi-satisfactory {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .aqi-moderate {
+            background: #ff9800;
+        }
+
+        .aqi-poor {
+            background: #f44336;
+        }
+
+        .aqi-very-poor {
+            background: #9c27b0;
+        }
+
+        .action-btn {
+            padding: 0.5rem 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-size: 0.9em;
+        }
+
+        .action-btn:hover {
+            background: #5568d3;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+            color: #999;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-header h3 {
+            color: #333;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .detail-value {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                min-width: auto;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            th, td {
+                padding: 0.75rem;
+            }
+
+            .action-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h1>🌍 Air Pollution Analysis</h1>
+        <div>
+            <a href="/dashboard">📊 Dashboard</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h2>📊 Prediction History</h2>
+            <p>View all your air pollution predictions and analysis results.</p>
+        </div>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label for="filterCity">Filter by City</label>
+                <input type="text" id="filterCity" placeholder="Enter city name">
+            </div>
+            <div class="filter-group">
+                <label for="filterDate">Filter by Date</label>
+                <input type="date" id="filterDate">
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>City</th>
+                        <th>AQI Prediction</th>
+                        <th>Quality Level</th>
+                        <th>Date & Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="historyBody">
+                    {% if predictions %}
+                        {% for prediction in predictions %}
+                            <tr class="prediction-item" data-city="{{ prediction.city }}" data-date="{{ prediction.created_at.strftime('%Y-%m-%d %H:%M') }}" data-result="{{ prediction.prediction_result }}">
+                                <td>{{ prediction.city }}</td>
+                                <td><strong>{{ "%.2f"|format(prediction.prediction_result) }}</strong></td>
+                                <td>
+                                    {% set aqi = prediction.prediction_result %}
+                                    {% if aqi < 50 %}
+                                        <span class="aqi-badge aqi-good">Good</span>
+                                    {% elif aqi < 100 %}
+                                        <span class="aqi-badge aqi-satisfactory">Satisfactory</span>
+                                    {% elif aqi < 200 %}
+                                        <span class="aqi-badge aqi-moderate">Moderate</span>
+                                    {% elif aqi < 300 %}
+                                        <span class="aqi-badge aqi-poor">Poor</span>
+                                    {% else %}
+                                        <span class="aqi-badge aqi-very-poor">Very Poor</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ prediction.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>
+                                    <button class="action-btn" onclick="viewDetails({ prediction,id })">View Details</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="no-data">No predictions found. Start by making a prediction on the dashboard!</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Prediction Details</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        function getQualityLevel(aqi) {
+            if (aqi < 50) return "Good";
+            if (aqi < 100) return "Satisfactory";
+            if (aqi < 200) return "Moderately Polluted";
+            if (aqi < 300) return "Poor";
+            return "Very Poor";
+        }
+
+        async function viewDetails(predictionId) {
+            try {
+                const response = await fetch(`/api/prediction/${predictionId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    const details = data;
+                    const input = details.input_data;
+                    const html = `
+                        <div class="detail-row">
+                            <span class="detail-label">City:</span>
+                            <span class="detail-value">${details.city}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Prediction:</span>
+                            <span class="detail-value">${parseFloat(details.prediction_result).toFixed(2)} AQI</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Quality:</span>
+                            <span class="detail-value">${getQualityLevel(details.prediction_result)}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Created:</span>
+                            <span class="detail-value">${details.created_at}</span>
+                        </div>
+                        <div class="detail-row" style="border-bottom: 2px solid #667eea; padding-top: 1rem; margin-top: 1rem;">
+                            <span class="detail-label">Input Parameters:</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">PM2.5:</span>
+                            <span class="detail-value">${input.PM25 || 'N/A'} μg/m³</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">PM10:</span>
+                            <span class="detail-value">${input.PM10 || 'N/A'} μg/m³</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">NO2:</span>
+                            <span class="detail-value">${input.NO2 || 'N/A'} μg/m³</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">NOx:</span>
+                            <span class="detail-value">${input.NOx || 'N/A'} μg/m³</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">NH3:</span>
+                            <span class="detail-value">${input.NH3 || 'N/A'} μg/m³</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">CO:</span>
+                            <span class="detail-value">${input.CO || 'N/A'} mg/m³</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">SO2:</span>
+                            <span class="detail-value">${input.SO2 || 'N/A'} μg/m³</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">O3:</span>
+                            <span class="detail-value">${input.O3 || 'N/A'} μg/m³</span>
+                        </div>
+                    `;
+                    document.getElementById('modalBody').innerHTML = html;
+                    document.getElementById('detailsModal').classList.add('active');
+                }
+            } catch (error) {
+                alert('Error loading details');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detailsModal').classList.remove('active');
+        }
+
+        // Filter functionality
+        const predictions = document.querySelectorAll('.prediction-item');
+        
+        document.getElementById('filterCity').addEventListener('input', filterTable);
+        document.getElementById('filterDate').addEventListener('change', filterTable);
+
+        function filterTable() {
+            const cityFilter = document.getElementById('filterCity').value.toLowerCase();
+            const dateFilter = document.getElementById('filterDate').value;
+
+            predictions.forEach(row => {
+                const city = row.getAttribute('data-city').toLowerCase();
+                const date = row.getAttribute('data-date');
+
+                const cityMatch = city.includes(cityFilter);
+                const dateMatch = !dateFilter || date.startsWith(dateFilter);
+
+                row.style.display = (cityMatch && dateMatch) ? '' : 'none';
+            });
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('detailsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'detailsModal') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

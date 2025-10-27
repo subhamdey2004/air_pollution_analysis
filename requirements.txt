@@ -1,0 +1,12 @@
+Flask
+Flask-SQLAlchemy
+Flask-Bcrypt
+Werkzeug
+numpy
+pandas
+scikit-learn
+joblib
+python-dotenv
+Jinja2
+WTForms
+email-validator
